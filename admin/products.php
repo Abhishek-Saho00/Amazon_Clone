@@ -1,4 +1,12 @@
-<?php session_start(); ?>
+<?php 
+session_start();
+
+if (!isset($_SESSION['admin'])) {
+    // Redirect non-admins to dedicated admin login page
+    header("Location: /Amazon_webSite/admin/login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -288,10 +296,16 @@
     <div class="container">
         <div class="admin-header">
             <h1>📦 Product Management Dashboard</h1>
-            <a href="../FrontEnd/index.php" class="back-link">
-                <i class="material-icons">arrow_back</i>
-                Back to Home
-            </a>
+            <div style="display: flex; gap: 15px;">
+                <a href="../FrontEnd/index.php" class="back-link">
+                    <i class="material-icons">arrow_back</i>
+                    Back to Home
+                </a>
+                <a href="../BackEnd/logout.php" class="back-link" style="color: #d32f2f;" onclick="event.preventDefault(); fetch('/Amazon_webSite/BackEnd/logout.php', {credentials:'same-origin'}).then(()=>{ window.location='/Amazon_webSite/FrontEnd/auth.php'; }).catch(()=>{ window.location='/Amazon_webSite/FrontEnd/auth.php'; });">
+                    <i class="material-icons">exit_to_app</i>
+                    Logout
+                </a>
+            </div>
         </div>
 
         <!-- Alert Messages -->

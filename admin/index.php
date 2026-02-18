@@ -1,4 +1,12 @@
-<?php session_start(); ?>
+<?php 
+session_start();
+
+if (!isset($_SESSION['admin'])) {
+    // Redirect to dedicated admin login page (no user password required)
+    header("Location: /Amazon_webSite/admin/login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,6 +116,9 @@
             </div>
             <div class="menu-item secondary">
                 <a href="../FrontEnd/index.php">🏠 Back to Homepage</a>
+            </div>
+            <div class="menu-item danger">
+                <a href="../BackEnd/logout.php" onclick="event.preventDefault(); fetch('/Amazon_webSite/BackEnd/logout.php', {credentials:'same-origin'}).then(()=>{ window.location='/Amazon_webSite/FrontEnd/auth.php'; }).catch(()=>{ window.location='/Amazon_webSite/FrontEnd/auth.php'; });">🚪 Logout</a>
             </div>
         </div>
 

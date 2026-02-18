@@ -1,12 +1,30 @@
 <?php
-include '../BackEnd/db.php';
+session_start();
+
+if (!isset($_SESSION['admin'])) {
+    header('Content-Type: application/json');
+    echo json_encode(["success" => false, "message" => "Unauthorized access"]);
+    exit(1);
+}
+
+try {
+    include '../BackEnd/db.php';
+} catch (Exception $e) {
+    header('Content-Type: application/json');
+    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+    exit(1);
+}
 
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
     if ($_GET['action'] === 'get_all') {
-        $products = getAllProducts();
-        echo json_encode(["products" => $products]);
+        try {
+            $products = getAllProducts();
+            echo json_encode(["products" => $products]);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => "Error fetching products"]);
+        }
         exit;
     }
 }
@@ -15,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
 
     if ($action === 'add') {
-        $name = $_POST['name'] ?? '';
-        $price = $_POST['price'] ?? '';
+        try {
+            $name = $_POST['name'] ?? '';
+            $price = $_POST['price'] ?? '';
 
         // Handle uploaded image if provided
         $image = '';
@@ -26,23 +45,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 mkdir($uploadDir, 0755, true);
             }
 
-            $tmpName = $_FILES['productImage']['tmp_name'];
-            $origName = basename($_FILES['productImage']['name']);
-            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-            $allowed = ['jpg','jpeg','png','gif','webp','svg'];
-            if (!in_array($ext, $allowed)) {
-                echo json_encode(["success" => false, "message" => "Invalid image type"]);
-                exit;
-            }
+            try {
+                $tmpName = $_FILES['productImage']['tmp_name'];
+                $origName = basename($_FILES['productImage']['name']);
+                $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+                $allowed = ['jpg','jpeg','png','gif','webp','svg'];
+                if (!in_array($ext, $allowed)) {
+                    echo json_encode(["success" => false, "message" => "Invalid image type"]);
+                    exit;
+                }
 
-            // create unique filename to avoid collisions
-            $safeName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $origName);
-            $dest = $uploadDir . $safeName;
+                // create unique filename to avoid collisions
+                $safeName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $origName);
+                $dest = $uploadDir . $safeName;
 
-            if (move_uploaded_file($tmpName, $dest)) {
-                $image = $safeName;
-            } else {
-                echo json_encode(["success" => false, "message" => "Failed to move uploaded file"]);
+                if (move_uploaded_file($tmpName, $dest)) {
+                    $image = $safeName;
+                } else {
+                    echo json_encode(["success" => false, "message" => "Failed to move uploaded file"]);
+                    exit;
+                }
+            } catch (Exception $e) {
+                echo json_encode(["success" => false, "message" => "File upload error"]);
                 exit;
             }
         } else {
@@ -55,37 +79,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             exit;
         }
 
-        $result = addProduct($name, $price, $image);
-        echo json_encode($result);
+            $result = addProduct($name, $price, $image);
+            echo json_encode($result);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => "Error adding product"]);
+        }
         exit;
     }
 
     if ($action === 'update') {
-        $id = $_POST['id'] ?? '';
-        $name = $_POST['name'] ?? '';
-        $price = $_POST['price'] ?? '';
-        $image = $_POST['image'] ?? '';
+        try {
+            $id = $_POST['id'] ?? '';
+            $name = $_POST['name'] ?? '';
+            $price = $_POST['price'] ?? '';
+            $image = $_POST['image'] ?? '';
 
-        if (!$id || !$name || !$price || !$image) {
-            echo json_encode(["success" => false, "message" => "All fields are required"]);
-            exit;
+            if (!$id || !$name || !$price || !$image) {
+                echo json_encode(["success" => false, "message" => "All fields are required"]);
+                exit;
+            }
+
+            $result = updateProduct($id, $name, $price, $image);
+            echo json_encode($result);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => "Error updating product"]);
         }
-
-        $result = updateProduct($id, $name, $price, $image);
-        echo json_encode($result);
         exit;
     }
 
     if ($action === 'delete') {
-        $id = $_POST['id'] ?? '';
+        try {
+            $id = $_POST['id'] ?? '';
 
-        if (!$id) {
-            echo json_encode(["success" => false, "message" => "Product ID is required"]);
-            exit;
+            if (!$id) {
+                echo json_encode(["success" => false, "message" => "Product ID is required"]);
+                exit;
+            }
+
+            $result = deleteProduct($id);
+            echo json_encode($result);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => "Error deleting product"]);
         }
-
-        $result = deleteProduct($id);
-        echo json_encode($result);
         exit;
     }
 }

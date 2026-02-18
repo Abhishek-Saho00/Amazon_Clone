@@ -58,21 +58,57 @@ session_start();
     #loginBox{
       display:none;
     }
+
+    .error-message {
+      color: #d32f2f;
+      background: #ffebee;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border-left: 4px solid #d32f2f;
+    }
+
+    .success-message {
+      color: #388e3c;
+      background: #e8f5e9;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border-left: 4px solid #388e3c;
+    }
   </style>
 </head>
 <body>
   <?php
-if(isset($_SESSION['signup_success'])){
-    echo "<script>
-        alert('" . $_SESSION['signup_success'] . "');
-        window.onload = function() {
-            document.getElementById('signupBox').style.display = 'none';
-            document.getElementById('loginBox').style.display = 'block';
-        };
-    </script>";
-    unset($_SESSION['signup_success']);
-}
-?>
+  $login_error = isset($_SESSION['login_error']) ? $_SESSION['login_error'] : '';
+  $signup_error = isset($_SESSION['signup_error']) ? $_SESSION['signup_error'] : '';
+  $signup_success = isset($_SESSION['signup_success']) ? $_SESSION['signup_success'] : '';
+  
+  unset($_SESSION['login_error']);
+  unset($_SESSION['signup_error']);
+  unset($_SESSION['signup_success']);
+  ?>
+  
+  <script>
+    var loginError = '<?php echo addslashes($login_error); ?>';
+    var signupError = '<?php echo addslashes($signup_error); ?>';
+    var signupSuccess = '<?php echo addslashes($signup_success); ?>';
+    
+    window.onload = function() {
+      if (signupSuccess) {
+        alert(signupSuccess);
+        document.getElementById('signupBox').style.display = 'none';
+        document.getElementById('loginBox').style.display = 'block';
+      } else if (loginError) {
+        alert(loginError);
+        // Show the login box when login error occurs
+        document.getElementById('signupBox').style.display = 'none';
+        document.getElementById('loginBox').style.display = 'block';
+      } else if (signupError) {
+        alert(signupError);
+      }
+    };
+  </script>
 
 
 
@@ -81,7 +117,7 @@ if(isset($_SESSION['signup_success'])){
   <!-- SIGN UP -->
   <div id="signupBox">
     <h2>Sign Up</h2>
-    <form action="/AMAZON_WEBSITE/BackEnd/signup.php" method="POST">
+    <form action="/Amazon_webSite/BackEnd/signup.php" method="POST">
       <input type="text" name="username" placeholder="Username" required>
       <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
@@ -97,7 +133,7 @@ if(isset($_SESSION['signup_success'])){
   <!-- LOGIN -->
   <div id="loginBox">
     <h2>Login</h2>
-   <form action="/AMAZON_WEBSITE/BackEnd/login.php" method="POST">
+  <form action="/Amazon_webSite/BackEnd/login.php" method="POST">
      <input type="email" name="email" placeholder="Email" required>
       <input type="password" name="password" placeholder="Password" required>
       <button type="submit">Login</button>

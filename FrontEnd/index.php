@@ -50,14 +50,17 @@
         </form>
 
 
-        <a href="auth.php" class="nav-signin border" style="text-decoration:none; color:white;" role="button" tabindex="0">
+        <div class="nav-signin border" style="text-decoration:none; color:white;" role="button" tabindex="0">
           <?php if(isset($_SESSION['username'])): ?>
             <p><span>Hello, <?php echo htmlspecialchars($_SESSION['username']); ?></span></p>
+            <p class="nav-second"><a href="/Amazon_webSite/BackEnd/logout.php" style="color:white; text-decoration:none;" onclick="event.preventDefault(); fetch('/Amazon_webSite/BackEnd/logout.php', {credentials:'same-origin'}).then(()=>{ window.location='/Amazon_webSite/FrontEnd/auth.php'; }).catch(()=>{ window.location='/Amazon_webSite/FrontEnd/auth.php'; });">Logout</a></p>
           <?php else: ?>
-            <p><span>Hello, Sign in</span></p>
+            <a href="auth.php" style="text-decoration:none; color:white;">
+              <p><span>Hello, Sign in</span></p>
+              <p class="nav-second">Account & Lists</p>
+            </a>
           <?php endif; ?>
-          <p class="nav-second">Account & Lists</p>
-        </a>
+        </div>
 
 
         <div class="nav-return border">
@@ -163,7 +166,12 @@ if($result && $result->num_rows > 0){
 <?php
     }
 } else {
-    echo "<div class='no-results'><h2>Item not found</h2><p>Try searching for something else</p></div>";
+    // Show different message if search was done vs empty database
+    if (empty($search)) {
+        echo "<div class='no-results'><h2>No products available</h2><p>Please check back soon!</p></div>";
+    } else {
+        echo "<div class='no-results'><h2>Item not found</h2><p>Try searching for something else</p></div>";
+    }
 }
 ?>
     </div>

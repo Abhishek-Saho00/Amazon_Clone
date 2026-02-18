@@ -1,13 +1,21 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "amazon_clone";
+// ========== IMPORTANT: UPDATE FOR PRODUCTION DEPLOYMENT ==========
+// Before uploading to a hosting provider, update these credentials:
+// $host is usually "localhost" on shared hosting
+// $user and $pass are found in your hosting control panel (cPanel, etc.)
+// $db should match the database name you created on your hosting provider
+// ===================================================================
+
+$host = "localhost";              // Usually stays "localhost"
+$user = "root";                   // ← UPDATE FOR PRODUCTION
+$pass = "";                       // ← UPDATE FOR PRODUCTION  
+$db   = "amazon_clone";           // ← UPDATE IF DIFFERENT
 
 $conn = new mysqli($host, $user, $pass, $db);
 
 if ($conn->connect_error) {
-    die("Database Connection Failed");
+    error_log("Database Connection Error: " . $conn->connect_error);
+    die("Database Connection Failed. Please contact the site administrator.");
 }
 
 // ================= CRUD FUNCTIONS FOR PRODUCTS =================
